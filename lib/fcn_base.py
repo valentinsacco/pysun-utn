@@ -1,3 +1,4 @@
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import use
 
@@ -36,6 +37,18 @@ def pot_generada_rango(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu = 2, Gstd =
         p.append(pot_modelo_GFV(G, T, N, Ppico, eta, kp, Pinv, mu, Gstd, Tr))
 
     return p
+
+def pot_media(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu = 2, Gstd = 1000, Tr = 25):
+    """"""
+    return np.mean(pot_generada_rango(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu, Gstd, Tr))
+
+def energia(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu = 2, Gstd = 1000, Tr = 25):
+    """
+    Retorna la energía (en kWh) promedio generada por un panel solar
+    asumiendo que el tiempo transcurrido entre mediciones es de 10 minutos
+    """
+    return pot_media(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu, Gstd, Tr) * 10 / 3600
+    
 
 def graficar_pot(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu = 2, Gstd = 1000, Tr = 25):
     """"""
