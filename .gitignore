@@ -6,3 +6,4 @@ lib/__pycache__/
 # Distribution / packaging / examples
 extra/solar-panels-db.py
 extra/examples/clase-24102025/assets/Datos_climatologicos_Santa_Fe_2019.xlsx
+extra/data/Datos_climatologicos_Santa_Fe_2019.xlsx
