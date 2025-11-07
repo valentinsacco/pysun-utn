@@ -1,2 +1,8 @@
-solar-panels-db.py
-examples/assets/Datos_climatologicos_Santa_Fe_2019.xlsx
+# Byte-compiled / optimized / DLL files
+__pycache__/
+lib/__pycache__/
+
+
+# Distribution / packaging / examples
+extra/solar-panels-db.py
+extra/examples/clase-24102025/assets/Datos_climatologicos_Santa_Fe_2019.xlsx
