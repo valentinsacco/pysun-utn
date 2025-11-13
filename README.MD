@@ -48,7 +48,7 @@ root/
 
 | Tarea | Desarrollador | Completada |
 | --- | --- | --- |
-| Implementar fcn_base.py | Tomás Broggi | [ ] |
+| Implementar fcn_base.py | Tomás Broggi | [ X ] |
 | Modificar README.md del proyecto | Valentin Sacco | [x] |
 
 ### REUNIONES
