@@ -6,15 +6,28 @@ import numpy as np
 
 def pot_modelo_GFV(G, T, N, Ppico, eta, kp, Pinv, mu = 2, Gstd = 1000, Tr = 25):
     """
-    Entradas:
-    G: Irradiancia total incidente (W/m2)
-    T: Temp. ambiente (°C)
-    N:
-    Ppico:
-    eta: Rendimiento
-
-    Salida:
-    Potencia del GFV en kW
+    Calcula la potencia generada por un sistema fotovoltaico bajo condiciones específicas.
+    
+    Implementa el modelo de cálculo de potencia para una instalación generadora
+    fotovoltaica (GFV) considerando la irradiancia, temperatura ambiente,
+    coeficiente de temperatura y límites de potencia del inversor.
+    
+    Args:
+        G (float): Irradiancia total incidente (W/m²)
+        T (float): Temperatura ambiente (°C)
+        N (int): Número de paneles
+        Ppico (float): Potencia pico del módulo (W)
+        eta (float): Rendimiento de la instalación
+        kp (float): Coeficiente de temperatura de potencia (1/°C)
+        Pinv (float): Potencia nominal del inversor (kW)
+        mu (float): Factor de mínima potencia (%). Default: 2
+        Gstd (float): Irradiancia estándar de referencia (W/m²). Default: 1000
+        Tr (float): Temperatura de referencia (°C). Default: 25
+    
+    Returns:
+        float: Potencia generada (kW). Devuelve 0 si está por debajo de la
+               potencia mínima del inversor, o la potencia nominal si excede
+               la capacidad máxima del inversor.
     """
     Tc = T + 0.031 * G
     P = N * (G / Gstd) * Ppico * (1 + kp * (Tc - Tr)) * eta * 1e-3
@@ -29,12 +42,27 @@ def pot_modelo_GFV(G, T, N, Ppico, eta, kp, Pinv, mu = 2, Gstd = 1000, Tr = 25):
         return Pinv
     
 def pot_generada_rango(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu = 2, Gstd = 1000, Tr = 25):
-    """"""
-    # Simil anterior, pero recibe en lista_G una lista (o vector) con
-    # cualquier cantidad de valores de irradiancia, y en lista_T una
-    # con igual cantidad de registros de temperatura ambiente.
-    # Devuelve otra lista (o contenedor) con las potencias generadas para
-    # cada par de valores de irradiancia y temperatura.
+    """
+    Calcula la potencia generada para múltiples pares de irradiancia y temperatura.
+    
+    Recibe listas de valores de irradiancia y temperatura ambiente, y devuelve
+    una lista con las potencias generadas para cada par de valores.
+    
+    Args:
+        lista_G (list): Lista de valores de irradiancia total incidente (W/m²)
+        lista_T (list): Lista de valores de temperatura ambiente (°C)
+        N (int): Número de paneles
+        Ppico (float): Potencia pico del módulo (W)
+        eta (float): Rendimiento de la instalación
+        kp (float): Coeficiente de temperatura de potencia (1/°C)
+        Pinv (float): Potencia nominal del inversor (kW)
+        mu (float): Factor de mínima potencia (%). Default: 2
+        Gstd (float): Irradiancia estándar (W/m²). Default: 1000
+        Tr (float): Temperatura de referencia (°C). Default: 25
+    
+    Returns:
+        list: Lista de potencias generadas (kW) para cada par de entrada
+    """
     
     p = []
 
@@ -44,10 +72,27 @@ def pot_generada_rango(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu = 2, Gstd =
     return p
 
 def pot_media(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu=2, Gstd=1000,Tr=25):
-    """"""
-    # Recibe los mismos argumentos que la función anterior, y devuelve
-    # la potencia que resulta de promediar todas las calculadas con
-    # cada par de valores de irradiancia y temperatura ambiente.
+    """
+    Calcula la potencia media generada para múltiples pares de irradiancia y temperatura.
+    
+    Recibe los mismos argumentos que pot_generada_rango y devuelve el promedio
+    de todas las potencias calculadas.
+    
+    Args:
+        lista_G (list): Lista de valores de irradiancia total incidente (W/m²)
+        lista_T (list): Lista de valores de temperatura ambiente (°C)
+        N (int): Número de paneles
+        Ppico (float): Potencia pico del módulo (W)
+        eta (float): Rendimiento de la instalación
+        kp (float): Coeficiente de temperatura de potencia (1/°C)
+        Pinv (float): Potencia nominal del inversor (kW)
+        mu (float): Factor de mínima potencia (%). Default: 2
+        Gstd (float): Irradiancia estándar (W/m²). Default: 1000
+        Tr (float): Temperatura de referencia (°C). Default: 25
+    
+    Returns:
+        float: Potencia promedio generada (kW)
+    """
 
     lista_potencias = pot_generada_rango(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu, Gstd, Tr)
     
@@ -58,10 +103,28 @@ def pot_media(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu=2, Gstd=1000,Tr=25):
 
 
 def energia(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu=2, Gstd=1000, Tr=25):
-    """"""
-    # Recibe los mismos argumentos que la función anterior, y devuelve
-    # la energía generada por el GFV (en kWh), asumiendo que el intervalo
-    # de tiempo transcurrido entre 2 mediciones de irradiancia (o de temp.) es de 10 minutos.
+    """
+    Calcula la energía total generada por el sistema fotovoltaico.
+    
+    Recibe los mismos argumentos que pot_generada_rango y devuelve la energía
+    generada por el GFV (en kWh), asumiendo que el intervalo de tiempo entre
+    mediciones es de 10 minutos.
+    
+    Args:
+        lista_G (list): Lista de valores de irradiancia total incidente (W/m²)
+        lista_T (list): Lista de valores de temperatura ambiente (°C)
+        N (int): Número de paneles
+        Ppico (float): Potencia pico del módulo (W)
+        eta (float): Rendimiento de la instalación
+        kp (float): Coeficiente de temperatura de potencia (1/°C)
+        Pinv (float): Potencia nominal del inversor (kW)
+        mu (float): Factor de mínima potencia (%). Default: 2
+        Gstd (float): Irradiancia estándar (W/m²). Default: 1000
+        Tr (float): Temperatura de referencia (°C). Default: 25
+    
+    Returns:
+        float: Energía total generada (kWh)
+    """
 
     lista_potencias = pot_generada_rango(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu, Gstd, Tr)
     
@@ -74,12 +137,28 @@ def energia(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu=2, Gstd=1000, Tr=25):
     return energia_total
 
 def factor_de_utilizacion(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu=2, Gstd=1000, Tr=25):
-    """"""
-    # Devuelve el factor de utilización de la instalación.
-    # Se calcula como la proporción de la energía generada (y calculada
-    # igual que en la función anterior),
-    # en relación (cociente) a la que podría haber entregado si todo el
-    # tiempo hubiera desarrollado la potencia nominal del inversor.
+    """
+    Calcula el factor de utilización de la instalación fotovoltaica.
+    
+    Se calcula como la proporción entre la energía generada y la que se podría
+    haber entregado si la instalación hubiera operado a potencia nominal del
+    inversor durante todo el período de medición.
+    
+    Args:
+        lista_G (list): Lista de valores de irradiancia total incidente (W/m²)
+        lista_T (list): Lista de valores de temperatura ambiente (°C)
+        N (int): Número de paneles
+        Ppico (float): Potencia pico del módulo (W)
+        eta (float): Rendimiento de la instalación
+        kp (float): Coeficiente de temperatura de potencia (1/°C)
+        Pinv (float): Potencia nominal del inversor (kW)
+        mu (float): Factor de mínima potencia (%). Default: 2
+        Gstd (float): Irradiancia estándar (W/m²). Default: 1000
+        Tr (float): Temperatura de referencia (°C). Default: 25
+    
+    Returns:
+        float: Factor de utilización (proporción entre 0 y 1)
+    """
 
     energia_generada = energia(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu, Gstd, Tr)
     
@@ -97,11 +176,28 @@ def factor_de_utilizacion(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu=2, Gstd=
     return factor
                           
 def max_pot(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu=2, Gstd=1000,Tr=25):
-    """"""
-    # Devuelve una tupla de 2 elementos. El primero es el la posición
-    # (orden) en las listas lista_G y lista_T para el cual se
-    # identifica la potencia máxima entregada, y el segundo es el valor
-    # de dicha potencia.
+    """
+    Identifica la potencia máxima generada y su posición temporal.
+    
+    Devuelve una tupla con la posición (índice) en las listas donde se alcanza
+    la potencia máxima y el valor de dicha potencia.
+    
+    Args:
+        lista_G (list): Lista de valores de irradiancia total incidente (W/m²)
+        lista_T (list): Lista de valores de temperatura ambiente (°C)
+        N (int): Número de paneles
+        Ppico (float): Potencia pico del módulo (W)
+        eta (float): Rendimiento de la instalación
+        kp (float): Coeficiente de temperatura de potencia (1/°C)
+        Pinv (float): Potencia nominal del inversor (kW)
+        mu (float): Factor de mínima potencia (%). Default: 2
+        Gstd (float): Irradiancia estándar (W/m²). Default: 1000
+        Tr (float): Temperatura de referencia (°C). Default: 25
+    
+    Returns:
+        tuple: Tupla (posicion, potencia_maxima) donde posicion es el índice
+               en las listas y potencia_maxima es el valor en kW
+    """
 
     lista_potencias = pot_generada_rango(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu, Gstd, Tr)
     
@@ -115,12 +211,28 @@ def max_pot(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu=2, Gstd=1000,Tr=25):
     return (posicion, valor_maximo)
     
 def graficar_pot(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu = 2, Gstd = 1000, Tr = 25):
-    """"""
-    # Genera una gráfica con la variación temporal de la potencia generada,
-    # calculada con los datos de irradiancia y temperatura provistos
-    # por lista_G y lista_T, respectivamente. Se asume que el intervalo
-    # de tiempo transcurrido entre 2 mediciones de irradiancia (o de temp.)
-    # es de 10 minutos. Devuelve una figura de Matplotlib.
+    """
+    Genera una gráfica de la variación temporal de la potencia generada.
+    
+    Crea una gráfica con la evolución temporal de la potencia generada
+    utilizando Matplotlib. Se asume que el intervalo de tiempo entre
+    mediciones es de 10 minutos.
+    
+    Args:
+        lista_G (list): Lista de valores de irradiancia total incidente (W/m²)
+        lista_T (list): Lista de valores de temperatura ambiente (°C)
+        N (int): Número de paneles
+        Ppico (float): Potencia pico del módulo (W)
+        eta (float): Rendimiento de la instalación
+        kp (float): Coeficiente de temperatura de potencia (1/°C)
+        Pinv (float): Potencia nominal del inversor (kW)
+        mu (float): Factor de mínima potencia (%). Default: 2
+        Gstd (float): Irradiancia estándar (W/m²). Default: 1000
+        Tr (float): Temperatura de referencia (°C). Default: 25
+    
+    Returns:
+        matplotlib.figure.Figure: Figura con la gráfica de potencia generada
+    """
 
     p = pot_generada_rango(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu, Gstd, Tr)
 
