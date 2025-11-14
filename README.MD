@@ -44,11 +44,16 @@ root/
 ```
 
 ## Bitácora Grupal
+
+### DESARROLLADORES
+- Valentín Sacco, vasacco1@gmail.com
+- Tomás Broggi, tomasbroggitw@gmail.com
+
 ### TAREAS
 
 | Tarea | Desarrollador | Completada |
 | --- | --- | --- |
-| Implementar fcn_base.py | Tomás Broggi | [ X ] |
+| Implementar fcn_base.py | Tomás Broggi | [x] |
 | Modificar README.md del proyecto | Valentin Sacco | [x] |
 
 ### REUNIONES
