@@ -1,15 +1,45 @@
 import streamlit as st
 
 def renderDocsScreen():
+    st.session_state.sidebar_state = "expanded"
     st.set_page_config(layout="centered")
 
-    # NO ESTÁ ANDANDO
+    # query_params = st.query_params
+    # page = query_params.get("page", 'home')
+
+    # js = f"""
+    # <script>
+    #     const sidebarState = parent.document.querySelector('.stSidebar')?.getAttribute('aria-expanded')
+    
+    #     const isDocs = {str(page == "docs").lower()}
+        
+    #     document.querySelector("header").style.left = (isDocs && sidebarState === "expanded") ? "256px" : "0px"
+    # </script>
+    # """
+
+    # st.markdown(js, unsafe_allow_html=True)
+    
     with st.sidebar:
-        st.markdown("<h2 style='color:#00d4ff; text-align:center;'>ÍNDICE</h2>", unsafe_allow_html=True)
-        st.markdown("<a href='#modelo' class='sidebar-link'>Modelo Matemático</a>", unsafe_allow_html=True)
-        st.markdown("<a href='#temp' class='sidebar-link'>Estimación T° Celda</a>", unsafe_allow_html=True)
-        st.markdown("<a href='#inversor' class='sidebar-link'>Límites Inversor</a>", unsafe_allow_html=True)
-        st.markdown("<a href='#derivados' class='sidebar-link'>Cálculos Derivados</a>", unsafe_allow_html=True)
+        st.markdown("""
+            <h2 style='color: #f54a00; text-align: left;'>ÍNDICE</h2>
+            <ul style='list-style: none; padding-left: 10px; font-size: 14px; color: #FFFFFF; display: flex; flex-direction: column; gap: 10px; cursor: pointer;'>
+                <li><a href="#modelo-matematico" style="color:#FFFFFF; text-decoration:none;">Modelo Matemático</a></li>
+                <li><a href="#estimacion-de-la-temperatura-de-celda" style="color:#FFFFFF; text-decoration:none;">Estimación de la Temperatura de Celda</a></li>
+                <li><a href="#limites-del-inversor" style="color:#FFFFFF; text-decoration:none;">Límites del Inversor</a></li>
+                <li><a href="#calculos-derivados" style="color:#FFFFFF; text-decoration:none;">Cálculos Derivados</a></li>
+                <li><a href="#referencias-y-condiciones-de-uso" style="color:#FFFFFF; text-decoration:none;">Límites y Restricciones</a></li>                    
+            </ul>
+            <script>
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        parent.document.querySelector(this.getAttribute('href'))?.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    });
+                });
+            </script>
+        """, unsafe_allow_html=True)
 
     st.markdown("""
         # Documentación Técnica
@@ -48,18 +78,28 @@ def renderDocsScreen():
         - $T_{amb}$: Temperatura ambiente (°C)
         - $G$: Irradiancia global (W/m²)
 
-        ### Límites Reales del Inversor
+        ### Límites del Inversor
 
-        Se aplican las siguientes restricciones reales del inversor:
+        Se aplican las siguientes restricciones del inversor:
 
         1. **Umbral mínimo de activación:**
+                
+        La potencia generada debe superar un umbral mínimo para que el inversor funcione correctamente:
     """)
     st.latex(r"P_{min} [kW] = \frac{\mu\%}{100} \cdot P_{inv} \quad \Rightarrow \quad P = 0")
-    st.latex(r"(\mu = 2\% \text{ por defecto})")
     st.markdown("""
         2. **Límite superior de potencia:**
+                
+        La potencia máxima está limitada por la capacidad nominal del inversor. La potencia entregada **Pr** se calcula como:
     """)
-    st.latex(r"\text{Si } P > P_{inv} \quad \Rightarrow \quad P = P_{inv}")
+    st.latex(r"""
+        P_r =
+        \begin{cases}
+        0 & \text{si } P \leq P_{\text{mín}} \\
+        P & \text{si } P_{\text{mín}} < P \leq P_{\text{inv}} \\
+        P_{\text{inv}} & \text{si } P > P_{\text{inv}}
+        \end{cases}
+    """)
     st.markdown("""
         | Parámetro     | Valor típico (GFV UTN) | Unidad |
         |---------------|------------------------|--------|

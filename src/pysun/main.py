@@ -15,7 +15,12 @@ st.markdown("""
             color: #FFFFFF;
         }
             
-        header {visibility: hidden !important;}
+        body {
+            background-color: #010408;
+        }
+            
+        # header {visibility: hidden !important;}
+        header { margin-top: -60px !important;}
         #MainMenu {visibility: hidden !important;}
         footer {visibility: hidden !important;}
         .css-1d391kg, .css-1v0mbdj {display: none !important;}
@@ -45,11 +50,39 @@ st.markdown("""
         .st-emotion-cache-1w723zb {
             padding: 0
         }
+            
+        .st-emotion-cache-8ezv7j {
+            position: relative;
+            top: 130px;
+            left: 1rem;
+            background-color: transparent;
+        }
+            
+        .stSidebar {
+            background-color: #010408;    
+        }
+
+        .stExpandSidebarButton {
+            background-color: #0D1117;
+        }
+            
+        .st-emotion-cache-pd6qx2 {
+            color: #FFFFFF;
+        }
+
+        [data-testid="stSidebarContent"] {
+            background-color: #0D1117;
+            color: white;
+        }
+            
+        h1[id], h2[id] h2, h3[id], h4[id], h5[id], h6[id] {
+            scroll-margin-top: 90px;
+        }
     </style>
 """, unsafe_allow_html=True)
 
 header = """
-    <div style="
+    <div id="header" style="
         position: fixed;
         top: 0;
         left: 0;
