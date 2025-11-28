@@ -19,19 +19,11 @@ st.markdown("""
             background-color: #010408;
         }
             
-        # header {visibility: hidden !important;}
         header { margin-top: -60px !important;}
         #MainMenu {visibility: hidden !important;}
         footer {visibility: hidden !important;}
         .css-1d391kg, .css-1v0mbdj {display: none !important;}
                 
-        code {
-            background-color: transparent !important;
-            border: none !important;
-            padding: 0 !important;
-            box-shadow: none !important;
-        }
-
         .stVerticalBlock {
             display: flex;
             flex-direccion: row;

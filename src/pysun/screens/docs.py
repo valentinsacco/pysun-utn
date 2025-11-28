@@ -1,7 +1,7 @@
 import streamlit as st
 
 def renderDocsScreen():
-    st.session_state.sidebar_state = "expanded"
+    st.session_state.sidebar_state = "collapsed"
     st.set_page_config(layout="centered")
 
     # query_params = st.query_params
@@ -58,7 +58,7 @@ def renderDocsScreen():
 
         | Símbolo       | Descripción                                      | Valor típico (GFV UTN) | Unidad     |
         |---------------|--------------------------------------------------|------------------------|------------|
-        | $P$           | Potencia entregada por el sistema                | —                      | kW         |
+        | $P_{SIS}$     | Potencia entregada por el sistema                | —                      | kW         |
         | $N$           | Número de paneles fotovoltaicos                  | 12                     | —          |
         | $G$           | Irradiancia global horizontal                    | Variable               | W/m²       |
         | $G_{std}$     | Irradiancia en condiciones estándar             | 1000                   | W/m²       |
@@ -110,9 +110,9 @@ def renderDocsScreen():
 
         | Magnitud                   | Fórmula                                                  | Unidad  |
         |----------------------------|----------------------------------------------------------|---------|
-        | Potencia media             | $\bar{P} = \frac{1}{n} \sum P_i $                        | kW      |
+        | Potencia media             | $\\bar{P} = \\frac{1}{n} \sum P_i $                        | kW      |
         | Energía diaria total       | $E = \sum P_i \cdot \Delta t$                            | kWh |
-        | Factor de utilización      | $FU = \frac{\bar{P}}{N \cdot P_{pico}/1000}$             | %       |
+        | Factor de utilización      | $FU = \\frac{\\bar{P}}{N \cdot P_{pico}/1000}$             | %       |
         | Potencia máxima registrada | $P_{máx} = \max(P_i)$                                    | kW      |
 
         ### Referencias y Condiciones de Uso
