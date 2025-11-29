@@ -1,12 +1,15 @@
-# main.py
-
 import streamlit as st
 
 from screens.home import renderHomeScreen
 from screens.docs import renderDocsScreen
 from screens.simulator import renderSimulatorScreen
 
-st.set_page_config(page_title="Simulador GFV - UTN Santa Fe", page_icon="⚡", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(
+    page_title="Simulador GFV - UTN Santa Fe", 
+    page_icon="⚡", 
+    layout="wide", 
+    initial_sidebar_state="expanded"
+)
 
 st.markdown("""
     <style>
@@ -23,13 +26,8 @@ st.markdown("""
         #MainMenu {visibility: hidden !important;}
         footer {visibility: hidden !important;}
         .css-1d391kg, .css-1v0mbdj {display: none !important;}
-                
-        .stVerticalBlock {
-            display: flex;
-            flex-direccion: row;
-            justify-content: space-between;
-            align-items: center;
-        }
+        
+        /* ELIMINÉ EL BLOQUE .stVerticalBlock QUE CAUSABA EL ERROR DE VISUALIZACIÓN */
                 
         .stMain {
             background-color: #010408;
@@ -73,6 +71,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+
 header = """
     <div id="header" style="
         position: fixed;
@@ -91,20 +90,19 @@ header = """
         z-index: 1000;
     ">
         <div style="display: flex; align-items: center; gap: 15px;">
-            <a href="/" style="text-decoration: none; color: white;"><img src="https://www.frsf.utn.edu.ar/utnabierta/imagenes/logo-utn.svg" height="40"/></a>
+            <a href="/" target="_self" style="text-decoration: none; color: white;"><img src="https://www.frsf.utn.edu.ar/utnabierta/imagenes/logo-utn.svg" height="40"/></a>
             <span style="font-size: 20px; font-weight: 600; font-family: 'Poppins', sans-serif; font-style: italic;">x</span>
             <img src="https://raw.githubusercontent.com/valentinsacco/pysun-utn/refs/heads/main/img/pysun-logo.png" height="40"/>
         </div>
 
         <div style="display: flex; gap: 30px; font-size: 1.1rem;">
-            <a href="?page=docs" style="text-decoration: none; font-weight: 400; font-size: 14px">Documentación</a>
-            <a href="?page=simulation" style="text-decoration: none; font-weight: 400; font-size: 14px">Simulador</a>
+            <a href="?page=docs" target="_self" style="text-decoration: none; font-weight: 400; font-size: 14px; color: white;">Documentación</a>
+            <a href="?page=simulation" target="_self" style="text-decoration: none; font-weight: 400; font-size: 14px; color: white;">Simulador</a>
         </div>
     </div>
 
     <div style="height:80px"></div>
-"""
-
+"""  
 st.html(header)
 
 query_params = st.query_params
@@ -123,7 +121,7 @@ else:
     st.html("""
         <div style='height: calc(100vh - 220px); width: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px;'>
             <span style='font-size: 30px; font-weight: 700; font-style: italic;'>404 - Página no Encontrada</span>
-            <a href='/' style='text-decoration: underline; color: #f54a00'>Volver al Inicio</a>
+            <a href='/' target='_self' style='text-decoration: underline; color: #f54a00'>Volver al Inicio</a>
         </div>
     """)
 

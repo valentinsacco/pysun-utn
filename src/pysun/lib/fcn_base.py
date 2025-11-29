@@ -2,8 +2,6 @@ import matplotlib.pyplot as plt
 from matplotlib import use
 import numpy as np
 
-# use('TgAgg')
-
 def pot_modelo_GFV(G, T, N, Ppico, eta, kp, Pinv, mu = 2, Gstd = 1000, Tr = 25):
     """
     Calcula la potencia generada por un sistema fotovoltaico bajo condiciones específicas.
