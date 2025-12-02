@@ -6,10 +6,11 @@ import plotly.express as px
 import matplotlib.pyplot as plt
 from datetime import time
 
-# Importamos TODAS las funciones de cálculo y graficado
+# Importamos TODAS las funciones de cálculo y graficado (Limpieza de imports)
 from lib.fcn_base import (
     pot_generada_rango, energia, factor_de_utilizacion, max_pot,
-    graficar_dispersion, graficar_torta, graficar_histograma, graficar_pot
+    graficar_torta, graficar_histograma, graficar_pot,
+    graficar_impacto_ambiental, graficar_mapa_calor
 )
 
 # Función para generar EXCEL real (.xlsx)
@@ -20,11 +21,10 @@ def _df_to_excel_bytes(df: pd.DataFrame) -> bytes:
     return output.getvalue()
 
 def renderSimulatorScreen():
-    # --- CAMBIO 1: TÍTULO CENTRADO ---
     st.markdown("<h1 style='text-align: center;'>Simulador de Generación Fotovoltaica</h1>", unsafe_allow_html=True)
     st.markdown("Carga los datos climáticos y ajusta los parámetros en la barra lateral.")
 
-    # --- INICIALIZACIÓN DE VARIABLES DE ESTADO ---
+    # --- INICIALIZACIÓN ---
     defaults = {
         "N": 12, "Ppico": 240.0, "eta": 0.97, "kp": -0.0044, "Pinv": 2.5, "mu": 2.0
     }
@@ -32,7 +32,7 @@ def renderSimulatorScreen():
         if key not in st.session_state:
             st.session_state[key] = val
 
-    # --- FUNCIÓN CALLBACK ---
+    # --- CALLBACK ---
     def cargar_datos_utn():
         st.session_state.N = 12
         st.session_state.Ppico = 240.0
@@ -41,7 +41,7 @@ def renderSimulatorScreen():
         st.session_state.Pinv = 2.5
         st.session_state.mu = 2.0
 
-    # --- BARRA LATERAL ---
+    # --- SIDEBAR ---
     st.sidebar.header("1. Configuración del GFV")
     st.sidebar.button("Cargar datos GFV UTN Santa Fe", on_click=cargar_datos_utn)
     
@@ -64,26 +64,106 @@ def renderSimulatorScreen():
     
     if uploaded_file:
         try:
+            # Lectura inicial
             if uploaded_file.name.endswith('.csv'):
-                df_raw = pd.read_csv(uploaded_file)
+                df_temp = pd.read_csv(uploaded_file)
             else:
-                df_raw = pd.read_excel(uploaded_file)
+                df_temp = pd.read_excel(uploaded_file)
             
-            if df_raw.shape[1] < 3:
-                st.error("El archivo debe tener al menos 3 columnas: [Fecha, Irradiancia, Temperatura]")
-                df_raw = None
+            # --- LÓGICA DE AUTO-MAPEO INTELIGENTE (MEJORADA) ---
+            if df_temp.shape[1] < 3:
+                st.error("⚠️ Error Crítico: El archivo debe tener al menos 3 columnas.")
             else:
-                cols = df_raw.columns
-                df_raw = df_raw.rename(columns={cols[0]: 'Fecha', cols[1]: 'G', cols[2]: 'T'})
-                df_raw['Fecha'] = pd.to_datetime(df_raw['Fecha'], dayfirst=True, errors='coerce')
-                df_raw = df_raw.dropna(subset=['Fecha'])
-                st.success(f"Archivo cargado correctamente. {len(df_raw)} registros encontrados.")
+                cols_orig = df_temp.columns[:3] # Tomamos las primeras 3
                 
-                with st.expander("Ver datos cargados (primeras filas)"):
+                col_date_name = None
+                cols_numeric = []
+                
+                # 1. Clasificación de Columnas
+                for col in cols_orig:
+                    is_real_date = False
+                    try:
+                        # Intentamos convertir a fecha
+                        series_date = pd.to_datetime(df_temp[col], dayfirst=True, errors='coerce')
+                        valid_count = series_date.notna().sum()
+                        
+                        # Si la mayoría son fechas válidas...
+                        if valid_count > (len(df_temp) * 0.8):
+                            # ...VERIFICAMOS EL AÑO para no confundir números con fechas Epoch (1970)
+                            mean_year = series_date.dt.year.mean()
+                            if mean_year > 1990: # Filtro de sentido común: Datos modernos
+                                is_real_date = True
+                                df_temp[col] = series_date # Confirmamos la conversión
+                    except:
+                        pass
+                    
+                    if is_real_date:
+                        col_date_name = col
+                    else:
+                        cols_numeric.append(col)
+
+                # Validación post-clasificación
+                if col_date_name is None:
+                    st.error("❌ No se detectó ninguna columna de Fechas válida (con años > 1990). Revise el archivo.")
+                    st.stop()
+                
+                if len(cols_numeric) < 2:
+                    # Si llegamos aquí, probablemente una columna numérica tenía formato raro pero no pasó como fecha
+                    # O el archivo tiene menos columnas útiles de las pensadas
+                    st.error("❌ No se encontraron suficientes columnas numéricas para G y T.")
+                    st.stop()
+                
+                # 2. Distinguir G vs T (Heurística)
+                # Forzamos conversión a número para analizar
+                for c in cols_numeric:
+                    df_temp[c] = pd.to_numeric(df_temp[c], errors='coerce').fillna(0)
+
+                # Tomamos las dos primeras numéricas encontradas (por si hubiera más)
+                col_A = cols_numeric[0]
+                col_B = cols_numeric[1]
+                
+                # Estadísticas para decidir
+                max_A = df_temp[col_A].max()
+                max_B = df_temp[col_B].max()
+                zeros_A = (df_temp[col_A] < 1).sum()
+                zeros_B = (df_temp[col_B] < 1).sum()
+                
+                # Sistema de Puntos para decidir cuál es G (Irradiancia)
+                score_G_A = 0
+                score_G_B = 0
+                
+                # Criterio 1: Máximo valor (G llega a 1000+, T raramente pasa 50)
+                if max_A > 150: score_G_A += 2
+                if max_B > 150: score_G_B += 2
+                
+                # Criterio 2: Ceros (G es 0 de noche, T casi nunca es 0 exacto muchas veces)
+                if zeros_A > (len(df_temp) * 0.2): score_G_A += 1
+                if zeros_B > (len(df_temp) * 0.2): score_G_B += 1
+                
+                if score_G_A >= score_G_B:
+                    col_G_name = col_A
+                    col_T_name = col_B
+                else:
+                    col_G_name = col_B
+                    col_T_name = col_A
+                
+                # --- ASIGNACIÓN FINAL ---
+                df_raw = pd.DataFrame()
+                df_raw['Fecha'] = df_temp[col_date_name]
+                df_raw['G'] = df_temp[col_G_name]
+                df_raw['T'] = df_temp[col_T_name]
+                
+                df_raw = df_raw.dropna(subset=['Fecha'])
+                
+                # Mensaje de Éxito
+                st.success(f"✅ Archivo procesado. Mapeo inteligente:")
+                st.info(f"📅 **Fecha:** {col_date_name} | ☀️ **Irradiancia:** {col_G_name} (Máx: {df_raw['G'].max():.1f}) | 🌡️ **Temperatura:** {col_T_name} (Máx: {df_raw['T'].max():.1f})")
+                
+                with st.expander("Ver datos estandarizados"):
                     st.dataframe(df_raw.head())
 
         except Exception as e:
-            st.error(f"Error al leer el archivo: {e}")
+            st.error(f"Error crítico al leer el archivo: {e}")
 
     # --- SIMULACIÓN ---
     if df_raw is not None:
@@ -134,7 +214,6 @@ def renderSimulatorScreen():
             c1, c2, c3 = st.columns(3)
             c1.metric("Energía REAL", f"{res['e_real']:.2f} kWh", help="Energía entregada a la red limitada por la potencia del inversor.")
             c2.metric("Energía TEÓRICA", f"{res['e_teorica']:.2f} kWh", help="Energía potencial que podrían haber generado los paneles sin limitaciones.")
-            # --- CAMBIO 2: TOOLTIP EN PÉRDIDA ---
             c3.metric("Pérdida (Clipping)", f"{res['e_perdida']:.2f} kWh", delta_color="inverse", help="Energía desperdiciada en los momentos donde la producción de los paneles superó la capacidad máxima del inversor (Pinv).")
             
             c4, c5 = st.columns(2)
@@ -177,7 +256,14 @@ def renderSimulatorScreen():
             # --- GRÁFICOS AVANZADOS ---
             st.markdown("### 📊 Análisis Técnico Anual")
             
-            tabs = st.tabs(["Dispersión (Saturación)", "Eficiencia & Frecuencia", "Mensual", "Reporte Estático"])
+            tabs = st.tabs([
+                "Dispersión", 
+                "Mapa de Calor", 
+                "Eficiencia & Frecuencia", 
+                "Mensual", 
+                "Impacto Ambiental", 
+                "Reporte Estático"
+            ])
 
             with tabs[0]:
                 st.markdown("**Correlación Irradiancia vs. Potencia** (Interactivo)")
@@ -193,39 +279,56 @@ def renderSimulatorScreen():
                 st.plotly_chart(fig_scatter, use_container_width=True)
 
             with tabs[1]:
+                st.markdown("**Mapa de Calor de Generación**")
+                st.caption("Distribución horaria de la potencia a lo largo del año.")
+                fig_heat = graficar_mapa_calor(df['Fecha'], res['potencias'])
+                st.pyplot(fig_heat)
+
+            with tabs[2]:
                 col_pie, col_hist = st.columns(2)
                 with col_pie:
                     st.markdown("**Pérdidas por Recorte**")
                     fig_pie = graficar_torta(res['e_real'], res['e_perdida'])
                     st.pyplot(fig_pie)
+                    muestras_sat = np.sum(res['potencias'] >= (res['Pinv'] - 0.01))
+                    horas_sat = muestras_sat * (10.0/60.0)
+                    st.metric("Horas de Saturación (Clipping)", f"{horas_sat:.1f} h", help="Tiempo total operando a potencia máxima del inversor.")
+
                 with col_hist:
                     st.markdown("**Histograma de Potencia**")
                     fig_hist = graficar_histograma(res['potencias'])
                     st.pyplot(fig_hist)
+                    muestras_activas = np.count_nonzero(res['potencias'])
+                    horas_activas = muestras_activas * (10.0/60.0)
+                    pct_tiempo = (horas_activas / 8760) * 100
+                    st.metric("Horas de Operación (Activas)", f"{horas_activas:.1f} h", delta=f"{pct_tiempo:.1f}% del año", help="Tiempo total que el generador estuvo encendido.")
 
-            with tabs[2]:
+            with tabs[3]:
                 st.markdown("**Generación Mensual**")
                 df['Mes'] = df['Fecha'].dt.month
                 monthly = df.groupby('Mes')['Potencia_kW'].sum() * (10.0/60.0)
                 meses_nombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]
-                
                 fig_bar, ax = plt.subplots(figsize=(10, 4))
                 ax.bar(monthly.index, monthly.values, color='skyblue', edgecolor='white')
                 ax.set_xticks(range(1, 13))
                 ax.set_xticklabels(meses_nombres)
                 ax.set_ylabel("Energía (kWh)")
                 ax.grid(axis='y', linestyle='--', alpha=0.3)
-                
                 fig_bar.patch.set_alpha(0.0); ax.patch.set_alpha(0.0)
                 ax.tick_params(colors='white'); ax.xaxis.label.set_color('white'); ax.yaxis.label.set_color('white')
                 for spine in ax.spines.values(): spine.set_edgecolor('white')
                 st.pyplot(fig_bar)
 
-            with tabs[3]:
+            with tabs[4]:
+                st.markdown("**Impacto Ecológico Acumulado**")
+                fig_co2, total_co2 = graficar_impacto_ambiental(res['potencias'], df['Fecha'])
+                st.pyplot(fig_co2)
+                st.metric("Total CO2 Evitado", f"{total_co2:.2f} Toneladas")
+
+            with tabs[5]:
                 st.markdown("**Gráfico de Potencia Estático**")
                 st.caption("Generado con la función `graficar_pot` del módulo base (Requisito PDF).")
                 fig_static = graficar_pot(res['lista_G'], res['lista_T'], res['N'], res['Ppico'], res['eta'], res['kp'], res['Pinv'], res['mu'], Gstd, Tr)
-                
                 fig_static.patch.set_alpha(0.0)
                 ax_s = fig_static.gca()
                 ax_s.patch.set_alpha(0.0)
@@ -237,8 +340,6 @@ def renderSimulatorScreen():
             # --- DESCARGAS ---
             st.divider()
             st.subheader("Descargas")
-            
-            # --- CAMBIO 3: TEXTO EXPLICATIVO ---
             st.markdown("""
             Descargue un archivo Excel con la serie temporal completa de los resultados de la simulación. 
             El archivo incluirá columnas para: **Fecha y Hora, Irradiancia (G), Temperatura (T) y Potencia de Salida Generada**.
