@@ -3,7 +3,6 @@ import streamlit as st
 def renderHomeScreen():
     st.set_page_config(layout="centered")
     st.title("Simulador de Generadores Fotovoltaicos")
-    # No sé si ponerlo a José Luis también
     st.markdown("""
         <div style="font-size: 16px; margin-bottom: 20px">
             <strong>Proyecto Integrador – Introducción a la Programación Científica en MATLAB y Python</strong><br>

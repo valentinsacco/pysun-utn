@@ -58,7 +58,7 @@ def renderDocsScreen():
 
         | Símbolo       | Descripción                                      | Valor típico (GFV UTN) | Unidad     |
         |---------------|--------------------------------------------------|------------------------|------------|
-        | $P_{SIS}$     | Potencia entregada por el sistema                | —                      | kW         |
+        | $P$     | Potencia entregada por el sistema                | —                      | kW         |
         | $N$           | Número de paneles fotovoltaicos                  | 12                     | —          |
         | $G$           | Irradiancia global horizontal                    | Variable               | W/m²       |
         | $G_{std}$     | Irradiancia en condiciones estándar             | 1000                   | W/m²       |
@@ -86,7 +86,7 @@ def renderDocsScreen():
                 
         La potencia generada debe superar un umbral mínimo para que el inversor funcione correctamente:
     """)
-    st.latex(r"P_{min} [kW] = \frac{\mu\%}{100} \cdot P_{inv} \quad \Rightarrow \quad P = 0")
+    st.latex(r"P_{min} [kW] = \frac{\mu\%}{100} \cdot P_{inv}")
     st.markdown("""
         2. **Límite superior de potencia:**
                 
