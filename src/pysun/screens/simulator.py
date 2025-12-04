@@ -22,7 +22,7 @@ def _df_to_excel_bytes(df: pd.DataFrame) -> bytes:
 
 def renderSimulatorScreen():
     st.markdown("<h1 style='text-align: center;'>Simulador de Generación Fotovoltaica</h1>", unsafe_allow_html=True)
-    st.markdown("Carga los datos climáticos y ajusta los parámetros en la barra lateral.")
+    st.markdown("Cargá los datos climáticos y ajustá los parámetros en la barra lateral.")
 
     # --- INICIALIZACIÓN ---
     defaults = {
@@ -42,8 +42,8 @@ def renderSimulatorScreen():
         st.session_state.mu = 2.0
 
     # --- SIDEBAR ---
-    st.sidebar.header("1. Configuración del GFV")
-    st.sidebar.button("Cargar datos GFV UTN Santa Fe", on_click=cargar_datos_utn)
+    st.sidebar.header("¡Configurá los parámetros de tu Generador Fotovoltaico!")
+    st.sidebar.button("Configurar con los datos del GFV de la UTN Santa Fe", on_click=cargar_datos_utn)
     
     N = st.sidebar.number_input("Cantidad de paneles (N)", min_value=1, key="N")
     Ppico = st.sidebar.number_input("Potencia Pico por panel [W]", min_value=0.0, step=5.0, format="%.1f", key="Ppico")
@@ -57,7 +57,7 @@ def renderSimulatorScreen():
     st.sidebar.info(f"Parámetros fijos: Gstd={Gstd} W/m², Tr={Tr}°C")
 
     # --- ZONA PRINCIPAL ---
-    st.subheader("2. Carga de Datos Meteorológicos")
+    st.subheader("Subí tu archivo con los Datos Meteorológicos.")
     uploaded_file = st.file_uploader("Subir archivo (Excel/CSV) con: Fecha, Irradiancia, Temperatura", type=["xlsx", "xls", "csv"])
     
     df_raw = None
@@ -168,7 +168,7 @@ def renderSimulatorScreen():
     # --- SIMULACIÓN ---
     if df_raw is not None:
         st.divider()
-        st.subheader("3. Resultados de la Simulación")
+        st.subheader("¡Analizá los resultados de la simulación con distintas métricas y gráficos ofrecidos!")
 
         if st.button("Ejecutar Simulación", type="primary"):
             lista_G = df_raw['G'].to_numpy()
@@ -222,7 +222,8 @@ def renderSimulatorScreen():
 
             # --- FILTRADO ---
             st.divider()
-            st.markdown("### 🔎 Filtrar Periodo de Análisis")
+            st.markdown("### 🔎 Acá podes filtrar el período de análisis")
+            st.markdown("Esta opción te sirve para analizar con mayor grado de detalle gracias al zoom que se puede aplicar al gráfico.")
             
             min_date = df['Fecha'].dt.date.min()
             max_date = df['Fecha'].dt.date.max()
@@ -326,8 +327,8 @@ def renderSimulatorScreen():
                 st.metric("Total CO2 Evitado", f"{total_co2:.2f} Toneladas")
 
             with tabs[5]:
-                st.markdown("**Gráfico de Potencia Estático**")
-                st.caption("Generado con la función `graficar_pot` del módulo base (Requisito PDF).")
+                st.markdown("**Gráfico de Potencia**")
+                st.caption("Igual que el gráfico interactivo con Plotly, pero en formato imagen para reportes.")
                 fig_static = graficar_pot(res['lista_G'], res['lista_T'], res['N'], res['Ppico'], res['eta'], res['kp'], res['Pinv'], res['mu'], Gstd, Tr)
                 fig_static.patch.set_alpha(0.0)
                 ax_s = fig_static.gca()

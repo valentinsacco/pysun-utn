@@ -61,6 +61,7 @@ root/
 | Desarrollo de la aplicación | Valentín Sacco y Tomás Broggi | [x] |
 | Redesarrollo de la aplicación (vuelta a empezar) | Tomás Broggi | [x] |
 | Mejoras de la etapa preliminar 2 sugeridas por el docente | Tomás Broggi | [x] |
+| Publicación de la aplicación | Valentín Sacco | [x] |
 
 ### REUNIONES
 
