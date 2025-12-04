@@ -26,8 +26,6 @@ st.markdown("""
         #MainMenu {visibility: hidden !important;}
         footer {visibility: hidden !important;}
         .css-1d391kg, .css-1v0mbdj {display: none !important;}
-        
-        /* ELIMINÉ EL BLOQUE .stVerticalBlock QUE CAUSABA EL ERROR DE VISUALIZACIÓN */
                 
         .stMain {
             background-color: #010408;

@@ -110,9 +110,9 @@ def renderDocsScreen():
 
         | Magnitud                   | Fórmula                                                  | Unidad  |
         |----------------------------|----------------------------------------------------------|---------|
-        | Potencia media             | $\\bar{P} = \\frac{1}{n} \sum P_i $                        | kW      |
-        | Energía diaria total       | $E = \sum P_i \cdot \Delta t$                            | kWh |
-        | Factor de utilización      | $FU = \\frac{\\bar{P}}{N \cdot P_{pico}/1000}$             | %       |
+        | Potencia media             | $\\bar{P} = \\frac{1}{n} \sum P_i $                      | kW      |
+        | Energía diaria total       | $E = \sum P_i \cdot \Delta t$                            | kWh     |
+        | Factor de utilización      | $FU = \\frac{\\bar{P}}{P_{inv}} \\cdot 100$              | %       |
         | Potencia máxima registrada | $P_{máx} = \max(P_i)$                                    | kW      |
 
         ### Referencias y Condiciones de Uso

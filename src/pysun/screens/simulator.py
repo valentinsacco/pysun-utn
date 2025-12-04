@@ -58,7 +58,7 @@ def renderSimulatorScreen():
 
     # --- ZONA PRINCIPAL ---
     st.subheader("Subí tu archivo con los Datos Meteorológicos.")
-    uploaded_file = st.file_uploader("Subir archivo (Excel/CSV) con: Fecha, Irradiancia, Temperatura", type=["xlsx", "xls", "csv"])
+    uploaded_file = st.file_uploader("Subir archivo (Excel/CSV) con: Fecha, Irradiancia, Temperatura (en el orden que quieras).", type=["xlsx", "xls", "csv"])
     
     df_raw = None
     
@@ -156,7 +156,7 @@ def renderSimulatorScreen():
                 df_raw = df_raw.dropna(subset=['Fecha'])
                 
                 # Mensaje de Éxito
-                st.success(f"✅ Archivo procesado. Mapeo inteligente:")
+                st.success(f"✅ Archivo procesado.")
                 st.info(f"📅 **Fecha:** {col_date_name} | ☀️ **Irradiancia:** {col_G_name} (Máx: {df_raw['G'].max():.1f}) | 🌡️ **Temperatura:** {col_T_name} (Máx: {df_raw['T'].max():.1f})")
                 
                 with st.expander("Ver datos estandarizados"):
@@ -179,10 +179,16 @@ def renderSimulatorScreen():
             df_res = df_raw.copy()
             df_res['Potencia_kW'] = potencias
 
+            # 1. Energía REAL
             e_real = energia(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu, Gstd, Tr)
             
-            Pinv_infinito = 999999.0 
-            e_teorica = energia(lista_G, lista_T, N, Ppico, eta, kp, Pinv_infinito, 0.0, Gstd, Tr)
+            Pinv_infinito = 999999.0
+            
+            p_arranque_real_kw = (mu / 100.0) * Pinv
+            
+            mu_ajustado = (p_arranque_real_kw / Pinv_infinito) * 100.0
+            
+            e_teorica = energia(lista_G, lista_T, N, Ppico, eta, kp, Pinv_infinito, mu_ajustado, Gstd, Tr)
             e_perdida = e_teorica - e_real
             
             f_util = factor_de_utilizacion(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu, Gstd, Tr)
@@ -213,12 +219,14 @@ def renderSimulatorScreen():
             # --- MÉTRICAS ---
             c1, c2, c3 = st.columns(3)
             c1.metric("Energía REAL", f"{res['e_real']:.2f} kWh", help="Energía entregada a la red limitada por la potencia del inversor.")
-            c2.metric("Energía TEÓRICA", f"{res['e_teorica']:.2f} kWh", help="Energía potencial que podrían haber generado los paneles sin limitaciones.")
+            c2.metric("Energía TEÓRICA", f"{res['e_teorica']:.2f} kWh", help="Potencial cantidad de energía que podrían haber generado los paneles sin limitación del inversor.")
             c3.metric("Pérdida (Clipping)", f"{res['e_perdida']:.2f} kWh", delta_color="inverse", help="Energía desperdiciada en los momentos donde la producción de los paneles superó la capacidad máxima del inversor (Pinv).")
             
             c4, c5 = st.columns(2)
             c4.metric("Potencia Máxima", f"{res['val_max']:.2f} kW", f"Fecha: {res['fecha_max']}")
             c5.metric("Factor de Utilización", f"{res['f_util']*100:.1f} %")
+
+            st.caption("Estas métricas son calculadas en base a todo el rango de datos cargado.")
 
             # --- FILTRADO ---
             st.divider()
@@ -326,9 +334,14 @@ def renderSimulatorScreen():
                 st.pyplot(fig_co2)
                 st.metric("Total CO2 Evitado", f"{total_co2:.2f} Toneladas")
 
+                st.info("""
+                **¿Qué significan estos números?**
+                * **Equivalencia:** Evitar 1 tonelada de $CO_2$ equivale aproximadamente a lo que absorben **50 árboles adultos** en un año o a dejar de conducir un auto promedio por unos **4.000 km**.
+                * **Fuente del Cálculo:** Se utilizó un factor de emisión de referencia de **0.45 kg $CO_2$/kWh**. Este es un valor promedio estimado para la matriz energética argentina (SADI). El dato preciso fue sacado del informe anual 2024 de CAMMESA (página 51). Para ver reportes oficiales actualizados, podés consultar el sitio de [CAMMESA](https://portalweb.cammesa.com/) o datos abiertos de la [Secretaría de Energía](https://www.argentina.gob.ar/economia/energia).
+                """)
+
             with tabs[5]:
                 st.markdown("**Gráfico de Potencia**")
-                st.caption("Igual que el gráfico interactivo con Plotly, pero en formato imagen para reportes.")
                 fig_static = graficar_pot(res['lista_G'], res['lista_T'], res['N'], res['Ppico'], res['eta'], res['kp'], res['Pinv'], res['mu'], Gstd, Tr)
                 fig_static.patch.set_alpha(0.0)
                 ax_s = fig_static.gca()
@@ -342,8 +355,8 @@ def renderSimulatorScreen():
             st.divider()
             st.subheader("Descargas")
             st.markdown("""
-            Descargue un archivo Excel con la serie temporal completa de los resultados de la simulación. 
-            El archivo incluirá columnas para: **Fecha y Hora, Irradiancia (G), Temperatura (T) y Potencia de Salida Generada**.
+            Acá tenés disponible un archivo Excel con la serie temporal completa de los resultados de la simulación. 
+            El archivo incluye columnas para: **Fecha y Hora, Irradiancia (G), Temperatura (T) y Potencia de Salida Generada**.
             """)
             
             excel_data = _df_to_excel_bytes(df[['Fecha', 'G', 'T', 'Potencia_kW']])
