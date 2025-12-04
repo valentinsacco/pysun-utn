@@ -53,14 +53,11 @@ def factor_de_utilizacion(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu=2, Gstd=
     """
     Calcula el factor de utilización.
     """
-    energia_generada = energia(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu, Gstd, Tr)
-    numero_de_muestras = len(lista_G)
-    intervalo_h = 10.0 / 60.0
-    tiempo_total_horas = numero_de_muestras * intervalo_h
-    energia_max_posible = Pinv * tiempo_total_horas
+    # Calculamos la potencia media usando la función que ya tenemos
+    potencia_promedio = pot_media(lista_G, lista_T, N, Ppico, eta, kp, Pinv, mu, Gstd, Tr)
     
-    if energia_max_posible > 0:
-        return energia_generada / energia_max_posible
+    if Pinv > 0:
+        return potencia_promedio / Pinv
     else:
         return 0.0
                           

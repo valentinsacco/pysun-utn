@@ -1,12 +1,12 @@
+import io
+
 import streamlit as st
 import pandas as pd
 import numpy as np
-import io
 import plotly.express as px
 import matplotlib.pyplot as plt
 from datetime import time
 
-# Importamos TODAS las funciones de cálculo y graficado (Limpieza de imports)
 from lib.fcn_base import (
     pot_generada_rango, energia, factor_de_utilizacion, max_pot,
     graficar_torta, graficar_histograma, graficar_pot,
@@ -353,3 +353,4 @@ def renderSimulatorScreen():
                 file_name="simulacion_pysun.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
+            

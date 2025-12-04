@@ -13,3 +13,4 @@ def renderHomeScreen():
                 
         <span style='display: block; width: 100%; text-align: justify;'>Este proyecto web permite <strong style='color:#f54a00; font-weight:600;'>modelar</strong> y <strong style='color:#f54a00; font-weight:600;'>simular</strong> la operación de un  generador  fotovoltaico  (GFV)  para  evaluar  el  desempeño  ante  diferentes configuraciones de componentes y condiciones climatológicas. El programa computa distintas variables de interés, las cuáles son visualizadas mediante distintos indicadores y gráficos para distintos periodos de tiempo.</span>
     """, unsafe_allow_html=True)
+    

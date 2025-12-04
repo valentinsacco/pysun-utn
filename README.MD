@@ -28,13 +28,15 @@ Desarrollar una herramienta educativa y técnica que permita:
 ```
 root/
 ├── src/pysun
-│ ├── main.py                   # Aplicación principal Streamlit
-│ ├── lib/ 
-│   ├── fcn_base.py             # Funciones base (cálculos FV)
-│   └── utils.py                # Utilidades (carga de datos, validación)
+│   ├── main.py                 # Aplicación principal Streamlit
+│   ├── lib/ 
+│   │   └── fcn_base.py         # Funciones base (cálculos FV y graficación)
+│   └── screens/
+│       ├── docs.py             # Pestaña de documentación técnica
+│       ├── home.py             # Pestaña de inicio
+│       └── simulator.py        # Pestaña de carga de datos y simulación, con devolución de gráficas y resultados
 ├── extra/
-│   ├── examples/...            # Ejemplo de datos meteorológicos
-│   └── solar-panels-db.json    # Base de datos de paneles
+│   └── examples/...            # Ejemplos de clases de la materia
 ├── img/
 │   ├── pysun-logo.png          # Logo oficial del proyecto
 │   └── pysun-logo.svg
@@ -55,7 +57,15 @@ root/
 | --- | --- | --- |
 | Implementar fcn_base.py | Tomás Broggi | [x] |
 | Modificar README.md del proyecto | Valentin Sacco | [x] |
+| Estructurar el estilo de la página de inicio y de la pestaña documentación + creación de pestaña de simulación | Valentín Sacco | [x] |
+| Desarrollo de la aplicación | Valentín Sacco y Tomás Broggi | [x] |
+| Redesarrollo de la aplicación (vuelta a empezar) | Tomás Broggi | [x] |
+| Mejoras de la etapa preliminar 2 sugeridas por el docente | Tomás Broggi | [x] |
 
 ### REUNIONES
 
 - Jueves 06/11/25 - 17:00 [hs]
+- Jueves 13/11/25 - 20:00 [hs]
+- Miércoles 26/11/25 - 22:00 [hs]
+- Jueves 27/11/25 - 15:30 [hs]
+- Viernes 28/11/25 - 11:00 [hs]
