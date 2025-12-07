@@ -70,7 +70,7 @@ def renderSimulatorScreen():
             else:
                 df_temp = pd.read_excel(uploaded_file)
             
-            # --- LÓGICA DE AUTO-MAPEO INTELIGENTE (MEJORADA) ---
+            # --- LÓGICA DE AUTO-MAPEO INTELIGENTE ---
             if df_temp.shape[1] < 3:
                 st.error("⚠️ Error Crítico: El archivo debe tener al menos 3 columnas.")
             else:

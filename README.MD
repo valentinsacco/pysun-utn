@@ -19,8 +19,8 @@ La plataforma ofrece un **dashboard intuitivo** con indicadores clave, gráficos
 Desarrollar una herramienta educativa y técnica que permita:
 
 - Configurar sistemas fotovoltaicos con distintos paneles, inversores y condiciones de instalación.
-- Analizar el impacto de la irradiación solar, temperatura ambiente e inclinación en la generación.
-- Visualizar resultados mediante indicadores (<10) y gráficos interactivos (≤4, con zoom en al menos uno).
+- Analizar el impacto de la irradiación solar y temperatura ambiente.
+- Visualizar resultados mediante indicadores y gráficos interactivos (con zoom en al menos uno).
 - Facilitar la comprensión del modelado físico de GFVs mediante una interfaz clara y documentada.
 
 ## Estructura del Repositorio
@@ -62,6 +62,7 @@ root/
 | Redesarrollo de la aplicación (vuelta a empezar) | Tomás Broggi | [x] |
 | Mejoras de la etapa preliminar 2 sugeridas por el docente | Tomás Broggi | [x] |
 | Publicación de la aplicación | Valentín Sacco | [x] |
+| Redacción de la memoria descriptiva final | Valentín Sacco y Tomás Broggi | [x] |
 
 ### REUNIONES
 

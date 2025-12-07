@@ -201,7 +201,6 @@ def graficar_mapa_calor(dates, potencias):
     """
     fig, ax = plt.subplots(figsize=(10, 5))
     
-    # Pandas es necesario aquí
     df_temp = pd.DataFrame({'Fecha': dates, 'Potencia': potencias})
     df_temp['Hora'] = df_temp['Fecha'].dt.hour
     df_temp['Fecha_Solo'] = df_temp['Fecha'].dt.date

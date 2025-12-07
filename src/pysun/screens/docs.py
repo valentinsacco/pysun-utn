@@ -27,7 +27,7 @@ def renderDocsScreen():
                 <li><a href="#estimacion-de-la-temperatura-de-celda" style="color:#FFFFFF; text-decoration:none;">Estimación de la Temperatura de Celda</a></li>
                 <li><a href="#limites-del-inversor" style="color:#FFFFFF; text-decoration:none;">Límites del Inversor</a></li>
                 <li><a href="#calculos-derivados" style="color:#FFFFFF; text-decoration:none;">Cálculos Derivados</a></li>
-                <li><a href="#referencias-y-condiciones-de-uso" style="color:#FFFFFF; text-decoration:none;">Límites y Restricciones</a></li>                    
+                <li><a href="#referencias-y-condiciones-de-uso" style="color:#FFFFFF; text-decoration:none;">Referencias y condiciones de uso</a></li>                    
             </ul>
             <script>
                 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -117,5 +117,5 @@ def renderDocsScreen():
 
         ### Referencias y Condiciones de Uso
 
-        - **Datos meteorológicos:** Archivo Excel con columnas: `Fecha`, `Hora`, `Temperatura (°C)`, `Irradiancia (W/m²)`
+        - **Datos meteorológicos:** Archivo Excel con columnas: `Fecha y Hora`, `Temperatura (°C)`, `Irradiancia (W/m²)`
     """)
