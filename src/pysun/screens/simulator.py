@@ -64,103 +64,88 @@ def renderSimulatorScreen():
     
     if uploaded_file:
         try:
-            # Lectura inicial
+            # 1. Lectura inicial
             if uploaded_file.name.endswith('.csv'):
                 df_temp = pd.read_csv(uploaded_file)
             else:
                 df_temp = pd.read_excel(uploaded_file)
             
-            # --- LÓGICA DE AUTO-MAPEO INTELIGENTE ---
             if df_temp.shape[1] < 3:
-                st.error("⚠️ Error Crítico: El archivo debe tener al menos 3 columnas.")
-            else:
-                cols_orig = df_temp.columns[:3] # Tomamos las primeras 3
-                
-                col_date_name = None
-                cols_numeric = []
-                
-                # 1. Clasificación de Columnas
-                for col in cols_orig:
-                    is_real_date = False
-                    try:
-                        # Intentamos convertir a fecha
-                        series_date = pd.to_datetime(df_temp[col], dayfirst=True, errors='coerce')
-                        valid_count = series_date.notna().sum()
-                        
-                        # Si la mayoría son fechas válidas...
-                        if valid_count > (len(df_temp) * 0.8):
-                            # ...VERIFICAMOS EL AÑO para no confundir números con fechas Epoch (1970)
-                            mean_year = series_date.dt.year.mean()
-                            if mean_year > 1990: # Filtro de sentido común: Datos modernos
-                                is_real_date = True
-                                df_temp[col] = series_date # Confirmamos la conversión
-                    except:
-                        pass
-                    
-                    if is_real_date:
-                        col_date_name = col
-                    else:
-                        cols_numeric.append(col)
+                st.error("⚠️ Error: El archivo debe tener al menos 3 columnas.")
+                st.stop()
 
-                # Validación post-clasificación
-                if col_date_name is None:
-                    st.error("❌ No se detectó ninguna columna de Fechas válida (con años > 1990). Revise el archivo.")
-                    st.stop()
+            # Tomamos solo las primeras 3 columnas para analizar
+            cols_orig = df_temp.columns[:3] 
+            
+            col_date_name = None
+            cols_numeric_candidates = []
+            
+            # 2. Detección de la columna FECHA
+            for col in cols_orig:
+                is_real_date = False
+                try:
+                    # Intentamos convertir a fecha
+                    series_date = pd.to_datetime(df_temp[col], dayfirst=True, errors='coerce')
+                    # Verificamos si la mayoría son datos válidos
+                    if series_date.notna().sum() > (len(df_temp) * 0.8):
+                        # Filtro de año para evitar falsos positivos numéricos
+                        if series_date.dt.year.mean() > 1990: 
+                            is_real_date = True
+                            df_temp[col] = series_date # Asignamos la conversión
+                except:
+                    pass
                 
-                if len(cols_numeric) < 2:
-                    # Si llegamos aquí, probablemente una columna numérica tenía formato raro pero no pasó como fecha
-                    # O el archivo tiene menos columnas útiles de las pensadas
-                    st.error("❌ No se encontraron suficientes columnas numéricas para G y T.")
-                    st.stop()
-                
-                # 2. Distinguir G vs T (Heurística)
-                # Forzamos conversión a número para analizar
-                for c in cols_numeric:
-                    df_temp[c] = pd.to_numeric(df_temp[c], errors='coerce').fillna(0)
-
-                # Tomamos las dos primeras numéricas encontradas (por si hubiera más)
-                col_A = cols_numeric[0]
-                col_B = cols_numeric[1]
-                
-                # Estadísticas para decidir
-                max_A = df_temp[col_A].max()
-                max_B = df_temp[col_B].max()
-                zeros_A = (df_temp[col_A] < 1).sum()
-                zeros_B = (df_temp[col_B] < 1).sum()
-                
-                # Sistema de Puntos para decidir cuál es G (Irradiancia)
-                score_G_A = 0
-                score_G_B = 0
-                
-                # Criterio 1: Máximo valor (G llega a 1000+, T raramente pasa 50)
-                if max_A > 150: score_G_A += 2
-                if max_B > 150: score_G_B += 2
-                
-                # Criterio 2: Ceros (G es 0 de noche, T casi nunca es 0 exacto muchas veces)
-                if zeros_A > (len(df_temp) * 0.2): score_G_A += 1
-                if zeros_B > (len(df_temp) * 0.2): score_G_B += 1
-                
-                if score_G_A >= score_G_B:
-                    col_G_name = col_A
-                    col_T_name = col_B
+                if is_real_date and col_date_name is None: # Nos quedamos con la primera fecha encontrada
+                    col_date_name = col
                 else:
-                    col_G_name = col_B
-                    col_T_name = col_A
-                
-                # --- ASIGNACIÓN FINAL ---
-                df_raw = pd.DataFrame()
-                df_raw['Fecha'] = df_temp[col_date_name]
-                df_raw['G'] = df_temp[col_G_name]
-                df_raw['T'] = df_temp[col_T_name]
-                
-                df_raw = df_raw.dropna(subset=['Fecha'])
-                
-                # Mensaje de Éxito
-                st.success(f"✅ Archivo procesado.")
-                st.info(f"📅 **Fecha:** {col_date_name} | ☀️ **Irradiancia:** {col_G_name} (Máx: {df_raw['G'].max():.1f}) | 🌡️ **Temperatura:** {col_T_name} (Máx: {df_raw['T'].max():.1f})")
-                
-                with st.expander("Ver datos estandarizados"):
-                    st.dataframe(df_raw.head())
+                    cols_numeric_candidates.append(col)
+
+            # Validaciones post-búsqueda
+            if col_date_name is None:
+                st.error("❌ No se detectó columna de Fecha válida.")
+                st.stop()
+            
+            if len(cols_numeric_candidates) < 2:
+                st.error("❌ Faltan columnas numéricas para G y T.")
+                st.stop()
+
+            # 3. Decidimos columnas de irradianta y temperatura usando promedios.
+            col_A = cols_numeric_candidates[0]
+            col_B = cols_numeric_candidates[1]
+            
+            # Forzamos numérico y llenamos nulos con 0
+            series_A = pd.to_numeric(df_temp[col_A], errors='coerce').fillna(0)
+            series_B = pd.to_numeric(df_temp[col_B], errors='coerce').fillna(0)
+            
+            mean_A = series_A.mean()
+            mean_B = series_B.mean()
+            
+            if mean_A > mean_B:
+                col_G_name = col_A
+                col_T_name = col_B
+            else:
+                col_G_name = col_B
+                col_T_name = col_A
+            
+            # --- CREACIÓN DEL DATAFRAME FINAL ---
+            df_raw = pd.DataFrame()
+            df_raw['Fecha'] = df_temp[col_date_name]
+            df_raw['G'] = pd.to_numeric(df_temp[col_G_name], errors='coerce')
+            df_raw['T'] = pd.to_numeric(df_temp[col_T_name], errors='coerce')
+            
+            df_raw = df_raw.dropna(subset=['Fecha']) # Limpiamos filas sin fecha
+            
+            # Mensaje de Éxito
+            st.success("✅ Archivo procesado y columnas mapeadas correctamente.")
+            st.info(f"""
+            **Mapeo automático:**
+            - 📅 **Fecha:** `{col_date_name}`
+            - ☀️ **Irradiancia (G):** `{col_G_name}`
+            - 🌡️ **Temperatura (T):** `{col_T_name}`
+            """)
+            
+            with st.expander("Ver primeros datos estandarizados"):
+                st.dataframe(df_raw.head())
 
         except Exception as e:
             st.error(f"Error crítico al leer el archivo: {e}")
@@ -367,4 +352,3 @@ def renderSimulatorScreen():
                 file_name="simulacion_pysun.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             )
-            
